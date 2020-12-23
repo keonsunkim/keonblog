@@ -20,7 +20,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, "templates")],
-        'APP_DIRS': False,
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -53,6 +53,7 @@ PROJECT_APPS = [
     'accounts',
     'home',
     'post',
+    'tag'
 ]
 
 INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
@@ -72,15 +73,7 @@ ROOT_URLCONF = 'keonblog.urls'
 WSGI_APPLICATION = 'keonblog.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
 
 
 # Password validation

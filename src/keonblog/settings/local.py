@@ -19,12 +19,12 @@ def get_json_secret(setting, secret_file_name):
 
         try:
             return secrets[settings]
+
         except KeyError:
             error_msg = f'Set the {setting} environment variable'
             raise ImproperlyConfigured(error_msg)
 
 SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY')
-
 # Debugging Settings only allow True in developing versions
 DEBUG = True
 
@@ -33,3 +33,17 @@ DEBUG = True
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"),]
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 STATIC_ROOT = os.path.join(BASE_DIR, "static_root")
+
+# Database
+# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+
+DATABASES={
+   'default':{
+      'ENGINE':'django.db.backends.postgresql_psycopg2',
+      'NAME':'postgres',
+      'USER':'postgres',
+      'PASSWORD': get_env_variable('KEONBLOGLOCALPG_PW'),
+      'HOST':'localhost',
+      'PORT':'5432',
+   }
+}
