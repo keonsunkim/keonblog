@@ -1,0 +1,5 @@
+TODO for the tag app.
+
+1. Improve tag count update queryset so that it does not update every tag row.
+2. Write thorough explanations on the update and subquery usage of tag count update.
+3. Really, allow robust manipulation of tag mechanism through the settings.py file.

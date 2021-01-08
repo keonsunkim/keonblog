@@ -1,16 +1,83 @@
+import json
+
 from django.db import models
 from django.conf import settings
 
-from .managers import TagManager
+from django.db.models import Q
+
 from .utils import (
-    classify_tag_input, tag_str_to_list, tag_data_lowercase
+    classify_tag_input, tag_str_to_list
     )
 
 from .settings import (HASH, HASHVALUES, COMMA, SEPARATOR,
                         IGNORE_NON_STRINGS, FORCE_LOWER_CASE)
 
 
-USER = settings.AUTH_USER_MODEL
+class TagManager(models.Manager):
+
+    def qs_get_from_ids(self, tag_ids_list):
+        tag_filters = Q()
+        for id in tag_ids_list:
+            tag_filters |= Q(id=id)
+        qs = self.filter(tag_filters)
+        return qs
+
+    def qs_get_from_slugs(self, tag_slugs_list):
+        tag_filters = Q()
+        for slug in tag_slugs_list:
+            tag_filters |= Q(slug__iexact=slug)
+        qs = self.filter(tag_filters)
+        return qs
+
+    def qs_get_or_create_from_slugs(self, tag_slugs_list):
+        for slug in tag_slugs_list:
+            obj, created = self.get_or_create(slug=slug)
+        qs = self.qs_get_from_slugs(tag_slugs_list)
+        return qs
+
+
+
+class PostTagManager(TagManager):
+
+    def update_tag_count(self):
+        """
+        This needs explanation and improvements.
+        """
+        #create subquery to update matching values
+        qs_tag_count = self.filter(
+                id=models.OuterRef('id')
+            ).annotate(
+                tag_counts=models.Count('posttagrelation__tag')
+            ).values('tag_counts')[:1]
+        #update tag counts from subquery
+        self.update(count=models.Subquery(qs_tag_count))
+
+class PostTagRelManager(models.Manager):
+
+    def update_tags(self, instance):
+        #generate queryset of tag relations of instance
+        qs_tags_of_instance = self.filter(post__id=instance.pk)
+
+        #get ids of tags of instance
+        current_tag_ids = set(list(
+            qs_tags_of_instance.values_list('tag',flat=True)
+        ))
+
+        #get ids of tags that needs update
+        tag_ids_from_instance = set([tag_dict['id'] for tag_dict in instance.tags['Tag']])
+
+        #find ids of tags that needs to be added and deleted
+        tag_ids_to_add = tag_ids_from_instance.difference(current_tag_ids)
+        tags_ids_to_delete = current_tag_ids.difference(tag_ids_from_instance)
+
+        #delete obsolete tag relationships
+        self.filter(tag__id__in=tags_ids_to_delete).delete()
+
+        #add new tag relationships
+        for tag_id in tag_ids_to_add:
+            tag, created = PostTag.objects.get_or_create(id=tag_id)
+            self.create(post_id=instance.pk, tag=tag)
+
 
 class PostTagModelQuerysetHandler:
     """
@@ -38,9 +105,8 @@ class PostTagModelQuerysetHandler:
 
     def _get_tag_queryset_(self, tag_data):
         qs = self.handle_input_func_dict.get(
-                classify_tag_input(tag_data_lowercase(tag_data))
+                classify_tag_input(tag_data)
              )(tag_data)
-        print(qs)
         return qs
 
     def tag_dict_to_queryset(self, tag_dict, *args):
@@ -49,6 +115,8 @@ class PostTagModelQuerysetHandler:
                 )
 
     def tag_str_to_queryset(self, tag_string, *args):
+        if FORCE_LOWER_CASE:
+            tag_string = tag_string.lower()
         tag_slug = tag_str_to_list(tag_string, self.separator)
         return PostTag.objects.qs_get_or_create_from_slugs(tag_slug)
 
@@ -74,9 +142,9 @@ class PostTag(models.Model):
 
     count = models.SmallIntegerField(default=0)
 
-    objects = TagManager()
+    objects = PostTagManager()
 
-    def __repr__(self):
+    def __str__(self):
         return f"{self.slug}({self.count})"
 
 
@@ -92,7 +160,7 @@ class PostTagRelation(models.Model):
                             db_index=True
                             )
 
-    # objects = PostTagRelManager()
+    objects = PostTagRelManager()
 
     class Meta:
         constraints = [

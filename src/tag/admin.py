@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+
+from .models import PostTag, PostTagRelation
+
+admin.site.register(PostTag)
+admin.site.register(PostTagRelation)

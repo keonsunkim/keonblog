@@ -15,16 +15,6 @@ json/dict(db) -> queryset(object) -> string(output)
 re_hash_sep_only_str = re.compile("(?:^|\s)[＃#]{1}(\w+)", re.UNICODE)
 
 
-def tag_data_lowercase(tag_data, *args):
-    if FORCE_LOWER_CASE:
-        if isinstance(tag_data, str):
-            tag_data = tag_data.lower()
-        elif isinstance(tag_data, dict):
-            for tag_dict in tag_data['Tag']:
-                tag_dict['slug'] = str(tag_dict['slug']).lower()
-        else:
-            pass
-    return tag_data
 
 def classify_tag_input(tag_data):
     if isinstance(tag_data, dict):
@@ -48,3 +38,9 @@ def tag_str_to_list(tag_string, separator, *args):
 
 def post_tag_default_dict():
     return dict(Tag=list())
+
+def get_value_and_return_cls_object(value, cls):
+    if isinstance(value, cls) or value is None:
+        return value
+    else:
+        return cls(value)
