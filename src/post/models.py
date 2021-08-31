@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 
+# from tinymce.models import HTMLField
+
 from tag.fields import PostTagField
 from tag.utils import post_tag_default_dict
 
@@ -35,6 +37,9 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
 
+    read_time = models.SmallIntegerField()
+    views = models.IntegerField()
+
     theme = models.CharField(max_length=30)
 
     photo = models.ImageField()
@@ -45,7 +50,7 @@ class Post(models.Model):
 
     short_description = models.CharField(max_length=200)
 
-    text = models.TextField(max_length=30)
+    # content = HTMLField()
 
     tags = PostTagField(
             null=True,

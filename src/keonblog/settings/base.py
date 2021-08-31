@@ -46,18 +46,21 @@ PREREQ_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
 ]
 
 PROJECT_APPS = [
-    'tag', 
+    'tag',
     'accounts',
     'home',
     'post',
 
 ]
 
-INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
+THIRD_PARTY_APPS = [
+    'tinymce',
+]
+
+INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
