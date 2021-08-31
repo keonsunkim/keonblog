@@ -34,7 +34,6 @@ TEMPLATES = [
 
 
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -57,7 +56,11 @@ PROJECT_APPS = [
 
 ]
 
-INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
+THIRDPARTY_APPS = [
+    'ckeditor',
+]
+
+INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS + THIRDPARTY_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
