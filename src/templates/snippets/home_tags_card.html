@@ -2,7 +2,12 @@
 
 <div class="card mb-3">
   <div class="card-body">
-    <h5 class="card-title">Card title</h5>
-    <p class="card-text">Alot of Tags</p>
+    <h5 class="card-title"><i class="fas fa-tags"></i>Tags</h5>
+    <p class="card-text">
+      {% for tag in tags %}
+        <i class="fas fa-tag"></i>
+        <a href="#" class="text-secondary">{{ tag }}</a>
+      {% endfor %}
+    </p>
   </div>
 </div>

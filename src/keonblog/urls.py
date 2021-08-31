@@ -18,7 +18,11 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', include('home.urls', namespace='home')),
-    # path('post/', include('post.urls', namepsace='post')),
+    path('announcement/', include('post.urls', namespace='announcement')),
+    path('article/', include('post.urls', namespace='article')),
+    path('academic/', include('post.urls', namespace='academic')),
+    path('tinymce/', include('tinymce.urls')),
+    # path('project/', include('post.urls', namespace='post')),
+    # later add projects app
     path('admin/', admin.site.urls),
-
 ]
