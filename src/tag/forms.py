@@ -8,7 +8,7 @@ class TagAdminForm(forms.ModelForm):
         fields = ('slug',)
 
 
-class TagField(forms.JSONField):
+class TagField(forms.CharField):
     """
     A ``CharField`` which validates that its input is a valid list of
     tag names.

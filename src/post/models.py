@@ -4,8 +4,6 @@ from django.conf import settings
 from tag.fields import PostTagField
 from tag.utils import post_tag_default_dict
 
-from ckeditor.fields import RichTextField
-
 USER = settings.AUTH_USER_MODEL
 
 class Post(models.Model):
@@ -47,7 +45,7 @@ class Post(models.Model):
 
     short_description = models.CharField(max_length=200)
 
-    text = RichTextField()
+    text = models.TextField(max_length=30)
 
     tags = PostTagField(
             null=True,
