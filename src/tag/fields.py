@@ -66,7 +66,7 @@ class PostTagField(TagField):
 
     def from_db_value(self, value, expression, connection):
         if value is None:
-            return value
+            return PostTagModelQuerysetHandler(value)
         return PostTagModelQuerysetHandler(value)
 
     def to_python(self, value):

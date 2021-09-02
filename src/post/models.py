@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 
-# from tinymce.models import HTMLField
+from tinymce.models import HTMLField
 
 from tag.fields import PostTagField
 from tag.utils import post_tag_default_dict
@@ -50,7 +50,7 @@ class Post(models.Model):
 
     short_description = models.CharField(max_length=200)
 
-    # content = HTMLField()
+    content = HTMLField()
 
     tags = PostTagField(
             null=True,

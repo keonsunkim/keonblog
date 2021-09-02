@@ -1,3 +1,4 @@
+import ast
 import json
 
 from django.db import models
@@ -6,7 +7,7 @@ from django.conf import settings
 from django.db.models import Q
 
 from .utils import (
-    classify_tag_input, tag_str_to_list
+    classify_tag_input, tag_str_to_list, 
     )
 
 from .settings import (HASH, HASHVALUES, COMMA, SEPARATOR,
@@ -16,6 +17,9 @@ from .settings import (HASH, HASHVALUES, COMMA, SEPARATOR,
 class TagManager(models.Manager):
 
     def qs_get_from_ids(self, tag_ids_list):
+        if not tag_ids_list:
+            return self.none()  
+
         tag_filters = Q()
         for id in tag_ids_list:
             tag_filters |= Q(id=id)
@@ -23,6 +27,9 @@ class TagManager(models.Manager):
         return qs
 
     def qs_get_from_slugs(self, tag_slugs_list):
+        if not tag_slugs_list:
+            return self.none()  
+
         tag_filters = Q()
         for slug in tag_slugs_list:
             tag_filters |= Q(slug__iexact=slug)
@@ -30,6 +37,9 @@ class TagManager(models.Manager):
         return qs
 
     def qs_get_or_create_from_slugs(self, tag_slugs_list):
+        if not tag_slugs_list:
+            return self.none()
+
         for slug in tag_slugs_list:
             obj, created = self.get_or_create(slug=slug)
         qs = self.qs_get_from_slugs(tag_slugs_list)
@@ -63,8 +73,10 @@ class PostTagRelManager(models.Manager):
             qs_tags_of_instance.values_list('tag',flat=True)
         ))
 
-        #get ids of tags that needs update
-        tag_ids_from_instance = set([tag_dict['id'] for tag_dict in instance.tags['Tag']])
+        if isinstance(instance.tags, str):
+            tag_ids_from_instance = set([tag.id for tag in PostTag.objects.qs_get_from_slugs(instance.tags)])
+        else: 
+            tag_ids_from_instance = set([tag_dict['id'] for tag_dict in instance.tags['Tag']])
 
         #find ids of tags that needs to be added and deleted
         tag_ids_to_add = tag_ids_from_instance.difference(current_tag_ids)
@@ -97,6 +109,7 @@ class PostTagModelQuerysetHandler:
         }
         self.tag_queryset = self._get_tag_queryset_(tag_data)
 
+
     def __repr__(self):
         return self.stringify()
 
@@ -117,12 +130,16 @@ class PostTagModelQuerysetHandler:
     def tag_str_to_queryset(self, tag_string, *args):
         if FORCE_LOWER_CASE:
             tag_string = tag_string.lower()
-        tag_slug = tag_str_to_list(tag_string, self.separator)
-        return PostTag.objects.qs_get_or_create_from_slugs(tag_slug)
+        form_dict, tag_list = tag_str_to_list(tag_string)
+
+        if form_dict.get('form') == 'id':
+            return PostTag.objects.qs_get_from_ids(tag_list)
+        elif form_dict.get('form') == 'slug':
+            return PostTag.objects.qs_get_or_create_from_slugs(tag_list)
 
     def stringify(self):
         tag_string = ' '.join(
-                    [HASH + obj.slug + self.separator for obj in self.tag_queryset]
+                    [HASH + obj.slug for obj in self.tag_queryset]
                     )
         return tag_string
 
